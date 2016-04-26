@@ -1,8 +1,12 @@
 package com.vitorog.nubankreport;
 
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,11 +17,19 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
+    private NotificationReceiver receiver;
+    final static String notificationListenerIntent = "com.vitorog.nubankreport.NOTIFICATION_LISTENER";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.i("MainActivity", "onCreate");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(notificationListenerIntent);
+        receiver = new NotificationReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+
 
 
         Button accessButton = (Button)this.findViewById(R.id.accessButton);
@@ -67,5 +79,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class NotificationReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Notification received", "MainActivity HERE");
+        }
     }
 }
