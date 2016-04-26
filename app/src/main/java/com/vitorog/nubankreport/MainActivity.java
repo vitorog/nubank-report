@@ -1,9 +1,15 @@
 package com.vitorog.nubankreport;
 
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,6 +17,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.i("MainActivity", "onCreate");
+
+
+        Button accessButton = (Button)this.findViewById(R.id.accessButton);
+        accessButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+                startActivity(intent);
+            }
+        });
+
+        Button createNotificationButton = (Button) this.findViewById(R.id.createNotificationButton);
+        createNotificationButton.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Log.i("Create notification","HERE");
+                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
+                builder.setContentTitle("Test Notification");
+                builder.setContentText("Test Notification Text");
+                builder.setAutoCancel(true);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+                manager.notify((int)System.currentTimeMillis(), builder.build());
+            }
+        });
+
     }
 
     @Override
