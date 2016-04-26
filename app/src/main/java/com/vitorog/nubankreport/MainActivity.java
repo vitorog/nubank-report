@@ -13,12 +13,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private NotificationReceiver receiver;
     final static String notificationListenerIntent = "com.vitorog.nubankreport.NOTIFICATION_LISTENER";
+
+    private ArrayList<String> notificationsList = new ArrayList<String>();
+    private ArrayAdapter<String> notificationsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +37,9 @@ public class MainActivity extends AppCompatActivity {
         receiver = new NotificationReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
-
+        notificationsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,  notificationsList);
+        ListView list = (ListView)this.findViewById(R.id.notificationsListView);
+        list.setAdapter(notificationsAdapter);
 
         Button accessButton = (Button)this.findViewById(R.id.accessButton);
         accessButton.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i("Notification received", "MainActivity HERE");
+            Bundle extras = intent.getExtras();
+            notificationsList.add(extras.getString("package") + " - " + extras.getString("id") + " - " + extras.getString("posttime") + " - " + extras.getString("ticker"));
+            notificationsAdapter.notifyDataSetChanged();
         }
     }
 }

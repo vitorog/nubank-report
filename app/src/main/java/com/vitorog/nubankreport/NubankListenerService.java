@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,12 +35,12 @@ public class NubankListenerService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Log.i("NotificationPosted", "Posted");
+        Log.i("NubankListenerService", "onNotificationPosted: " + sbn.getId() + " - " + sbn.getNotification().tickerText + " - " + sbn.getPackageName());
         Intent msg = new Intent(nubankListenerIntent);
-        msg.putExtra("package", "testpackage");
-        msg.putExtra("ticker", "testticker");
-        msg.putExtra("title", "testextra");
-        msg.putExtra("text", "testextra2");
+        msg.putExtra("package", sbn.getPackageName());
+        msg.putExtra("ticker", sbn.getNotification().tickerText);
+        msg.putExtra("posttime", Long.toString(sbn.getPostTime()));
+        msg.putExtra("id", Integer.toString(sbn.getId()));
         LocalBroadcastManager.getInstance(this).sendBroadcast(msg);
     }
 
@@ -54,10 +55,11 @@ public class NubankListenerService extends NotificationListenerService {
 
             Log.i("Receiver", "TEST");
             Intent msg = new Intent(MainActivity.notificationListenerIntent);
-            msg.putExtra("package", "testpackage");
-            msg.putExtra("ticker", "testticker");
-            msg.putExtra("title", "testextra");
-            msg.putExtra("text", "testextra2");
+            Bundle extras = intent.getExtras();
+            msg.putExtra("package", extras.getString("package"));
+            msg.putExtra("ticker", extras.getString("ticker"));
+            msg.putExtra("posttime", extras.getString("posttime"));
+            msg.putExtra("id", extras.getString("id"));
             LocalBroadcastManager.getInstance(NubankListenerService.this).sendBroadcast(msg);
         }
     }
