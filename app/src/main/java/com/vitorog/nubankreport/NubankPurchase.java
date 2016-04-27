@@ -40,7 +40,20 @@ public class NubankPurchase {
         }
     }
 
+    public NubankPurchase(String formattedValueStr, String place, String date){
+        this.formattedValueStr = formattedValueStr;
+        this.place = place;
+        this.date = date;
+        String valueStr = formattedValueStr.replaceFirst(Constants.NUBANK_CURRENCY_COMMA_CHAR, Constants.NUBANK_CURRENCY_DOT_CHAR);
+        value = Double.valueOf(valueStr);
+    }
+
     private void parseNotificationText() {
+        if(notificationText == null){
+            value = -1.0;
+            Log.w(TAG, "Invalid notification.");
+            return;
+        }
         int separatorPos = notificationText.indexOf(Constants.NUBANK_VALUE_PLACE_SEPARATOR);
         int currencySymbolPos = notificationText.indexOf(Constants.NUBANK_BRAZILIAN_CURRENCY_SYMBOL);
         if(separatorPos != -1 && currencySymbolPos != -1){
@@ -79,7 +92,7 @@ public class NubankPurchase {
     }
 
     public String getDisplayString() {
-        return getPlace() + " - " + Constants.NUBANK_BRAZILIAN_CURRENCY_SYMBOL + Double.toString(getValue());
+        return getPlace() + " - " + Constants.NUBANK_BRAZILIAN_CURRENCY_SYMBOL + Double.toString(getValue()) + " - " + getDate();
     }
 
     public Double getValue() {
@@ -105,4 +118,8 @@ public class NubankPurchase {
     public String getNotificationTitle() {
         return notificationTitle;
     }
+
+    public String getFormattedValueStr() {  return formattedValueStr;   }
+
+    public Boolean isValid() { return value != -1.0; }
 }

@@ -20,7 +20,7 @@ public class Constants {
 
     public static final String NUBANK_NOTIFICATION_TAG = "Nubank";
     public static final String NUBANK_NOTIFICATION_TITLE = "Compra no cartão Nubank";
-    public static final String NUBANK_NOTIFICATION_TEXT_EXAMPLE = "R$10,00 em Loja Exemplo";
+    public static final String NUBANK_NOTIFICATION_TEXT_EXAMPLE = " em Loja Exemplo";
     public static final String NUBANK_VALUE_PLACE_SEPARATOR = "em";
     public static final String NUBANK_BRAZILIAN_CURRENCY_SYMBOL = "R$";
     public static final String NUBANK_CURRENCY_COMMA_CHAR = ",";

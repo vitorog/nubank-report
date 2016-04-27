@@ -31,7 +31,7 @@ public class NubankListenerService extends NotificationListenerService {
     public void onDestroy() {
         Log.i(TAG, "Destroyed");
         super.onDestroy();
-        unregisterReceiver(serviceReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceReceiver);
     }
 
     @Override
