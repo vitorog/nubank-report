@@ -18,6 +18,8 @@ public class NubankListenerService extends NotificationListenerService {
 
     private final static String TAG = "NubankListenerService";
 
+    public static boolean isStarted = false;
+
     @Override
     public void onCreate() {
         Log.i(TAG, "Started");
@@ -25,6 +27,7 @@ public class NubankListenerService extends NotificationListenerService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.NUBANK_NOTIFICATION_LISTENER_INTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(serviceReceiver, filter);
+        isStarted = true;
     }
 
     @Override
@@ -36,7 +39,8 @@ public class NubankListenerService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        String notificationTitle = sbn.getNotification().extras.getString(Constants.ANDROID_NOTIFICATION_TITLE);
+        // This handles big style notifications
+        String notificationTitle = sbn.getNotification().extras.getCharSequence(Constants.ANDROID_NOTIFICATION_TITLE).toString();
         // Check if it's a Nubank notification
         if(notificationTitle != null && notificationTitle.contains(Constants.NUBANK_NOTIFICATION_TAG)) {
             Intent msg = new Intent(Constants.NUBANK_NOTIFICATION_LISTENER_INTENT);

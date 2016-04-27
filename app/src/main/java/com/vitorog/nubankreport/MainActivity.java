@@ -99,6 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new NubankPurchasesDbHelper(getApplicationContext());
         readDatabaseEntries();
+
+        if(!NubankListenerService.isStarted){
+            Toast.makeText(MainActivity.this, "Notification permission required.", Toast.LENGTH_LONG).show();
+            goToNotificationSettings();
+        }
     }
 
     @Override
@@ -124,8 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(Constants.ANDROID_NOTIFICATION_LISTENER_SETTINGS);
-            startActivity(intent);
+            goToNotificationSettings();
             return true;
         }
 
@@ -135,6 +139,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goToNotificationSettings() {
+        Intent intent = new Intent(Constants.ANDROID_NOTIFICATION_LISTENER_SETTINGS);
+        startActivity(intent);
     }
 
     private void addNewPurchase(NubankPurchase purchase){
