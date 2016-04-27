@@ -9,7 +9,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private NotificationReceiver receiver;
-    final static String notificationListenerIntent = "com.vitorog.nubankreport.NOTIFICATION_LISTENER";
 
     private ArrayList<String> notificationsList = new ArrayList<String>();
     private ArrayAdapter<String> notificationsAdapter;
@@ -31,9 +29,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i("MainActivity", "onCreate");
         IntentFilter filter = new IntentFilter();
-        filter.addAction(notificationListenerIntent);
+        filter.addAction(Constants.NUBANK_PURCHASE_LISTENER_INTENT);
         receiver = new NotificationReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
@@ -41,26 +38,16 @@ public class MainActivity extends AppCompatActivity {
         ListView list = (ListView)this.findViewById(R.id.notificationsListView);
         list.setAdapter(notificationsAdapter);
 
-        Button accessButton = (Button)this.findViewById(R.id.accessButton);
-        accessButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-                startActivity(intent);
-            }
-        });
 
         Button createNotificationButton = (Button) this.findViewById(R.id.createNotificationButton);
         createNotificationButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                Log.i("Create notification","HERE");
                 NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
-                builder.setContentTitle("Test Notification");
-                builder.setContentText("Test Notification Text");
-                builder.setAutoCancel(true);
+                builder.setContentTitle(Constants.NUBANK_NOTIFICATION_TITLE);
+                builder.setContentText(Constants.NUBANK_NOTIFICATION_TEXT_EXAMPLE);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 manager.notify((int)System.currentTimeMillis(), builder.build());
             }
@@ -84,20 +71,26 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(Constants.ANDROID_NOTIFICATION_LISTENER_SETTINGS);
+            startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void addNewPurchase(NubankPurchase purchase){
+        notificationsList.add(purchase.getFormattedString());
+        notificationsAdapter.notifyDataSetChanged();
+    }
+
+
+
     class NotificationReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i("Notification received", "MainActivity HERE");
-            Bundle extras = intent.getExtras();
-            notificationsList.add(extras.getString("package") + " - " + extras.getString("id") + " - " + extras.getString("posttime") + " - " + extras.getString("ticker"));
-            notificationsAdapter.notifyDataSetChanged();
+            addNewPurchase(new NubankPurchase(intent));
         }
     }
 }

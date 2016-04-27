@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.content.LocalBroadcastManager;
@@ -16,51 +15,52 @@ import android.util.Log;
 public class NubankListenerService extends NotificationListenerService {
 
     private NubankListenerServiceReceiver serviceReceiver;
-    private static final String nubankListenerIntent = "com.vitorog.nubankreport.NUBANK_LISTENER";
+
+    private final static String TAG = "NubankListenerService";
 
     @Override
     public void onCreate() {
-        Log.i("Listener Service", "onCreate");
+        Log.i(TAG, "Started");
         serviceReceiver = new NubankListenerServiceReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(nubankListenerIntent);
+        filter.addAction(Constants.NUBANK_NOTIFICATION_LISTENER_INTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(serviceReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "Destroyed");
         super.onDestroy();
         unregisterReceiver(serviceReceiver);
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Log.i("NubankListenerService", "onNotificationPosted: " + sbn.getId() + " - " + sbn.getNotification().tickerText + " - " + sbn.getPackageName());
-        Intent msg = new Intent(nubankListenerIntent);
-        msg.putExtra("package", sbn.getPackageName());
-        msg.putExtra("ticker", sbn.getNotification().tickerText);
-        msg.putExtra("posttime", Long.toString(sbn.getPostTime()));
-        msg.putExtra("id", Integer.toString(sbn.getId()));
-        LocalBroadcastManager.getInstance(this).sendBroadcast(msg);
+        String notificationTitle = sbn.getNotification().extras.getString(Constants.ANDROID_NOTIFICATION_TITLE);
+        // Check if it's a Nubank notification
+        if(notificationTitle.contains(Constants.NUBANK_NOTIFICATION_TAG)) {
+            Intent msg = new Intent(Constants.NUBANK_NOTIFICATION_LISTENER_INTENT);
+            msg.putExtra(Constants.TITLE_KEY, notificationTitle);
+            msg.putExtra(Constants.PACKAGE_KEY, sbn.getPackageName());
+            msg.putExtra(Constants.TICKER_KEY, sbn.getNotification().tickerText);
+            msg.putExtra(Constants.POST_TIME_KEY, sbn.getPostTime());
+            msg.putExtra(Constants.ID_KEY, Integer.toString(sbn.getId()));
+
+            msg.putExtra(Constants.TEXT_KEY, sbn.getNotification().extras.getString(Constants.ANDROID_NOTIFICATION_TEXT));
+            LocalBroadcastManager.getInstance(this).sendBroadcast(msg);
+        }
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        Log.i("NotificationRemoved", "Removed");
+        //Do nothing
     }
 
     class NubankListenerServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            Log.i("Receiver", "TEST");
-            Intent msg = new Intent(MainActivity.notificationListenerIntent);
-            Bundle extras = intent.getExtras();
-            msg.putExtra("package", extras.getString("package"));
-            msg.putExtra("ticker", extras.getString("ticker"));
-            msg.putExtra("posttime", extras.getString("posttime"));
-            msg.putExtra("id", extras.getString("id"));
-            LocalBroadcastManager.getInstance(NubankListenerService.this).sendBroadcast(msg);
+            // Broadcast to main activity
+            LocalBroadcastManager.getInstance(NubankListenerService.this).sendBroadcast(intent.setAction(Constants.NUBANK_PURCHASE_LISTENER_INTENT));
         }
     }
 }
