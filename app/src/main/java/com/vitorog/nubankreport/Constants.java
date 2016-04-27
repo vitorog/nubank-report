@@ -26,6 +26,9 @@ public class Constants {
     public static final String NUBANK_CURRENCY_COMMA_CHAR = ",";
     public static final String NUBANK_CURRENCY_DOT_CHAR = ".";
 
-    // Tab character, to break text in separate columns
-    public static final String SPREASHEET_COLUMN_DELIMITER = "\t";
+    // Google Spreadsheet allows splitting by semicolon when pasting text
+    public static final String SPREASHEET_COLUMN_DELIMITER = ";";
+
+    public static final int ACCOUNT_PICKER_INTENT = 1;
+    public static final int EMAIL_EXPORT_INTENT = 2;
 }

@@ -38,7 +38,7 @@ public class NubankListenerService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         String notificationTitle = sbn.getNotification().extras.getString(Constants.ANDROID_NOTIFICATION_TITLE);
         // Check if it's a Nubank notification
-        if(notificationTitle.contains(Constants.NUBANK_NOTIFICATION_TAG)) {
+        if(notificationTitle != null && notificationTitle.contains(Constants.NUBANK_NOTIFICATION_TAG)) {
             Intent msg = new Intent(Constants.NUBANK_NOTIFICATION_LISTENER_INTENT);
             msg.putExtra(Constants.TITLE_KEY, notificationTitle);
             msg.putExtra(Constants.PACKAGE_KEY, sbn.getPackageName());

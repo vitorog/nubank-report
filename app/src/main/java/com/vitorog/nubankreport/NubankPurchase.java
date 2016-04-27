@@ -88,7 +88,8 @@ public class NubankPurchase {
         return getPlace() +
                 Constants.SPREASHEET_COLUMN_DELIMITER + formattedValueStr +
                 Constants.SPREASHEET_COLUMN_DELIMITER + Constants.NUBANK_NOTIFICATION_TAG +
-                Constants.SPREASHEET_COLUMN_DELIMITER + date + " 1";
+                Constants.SPREASHEET_COLUMN_DELIMITER + date +
+                Constants.SPREASHEET_COLUMN_DELIMITER + "1";
     }
 
     public String getDisplayString() {
