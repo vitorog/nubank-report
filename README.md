@@ -1,3 +1,6 @@
+Nubank Report
+=============
+
 An adroid application that captures notifications from the Nubank app and 
 creates a report that can be sent by email and easily added to a spreadsheet.
 
