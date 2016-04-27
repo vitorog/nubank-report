@@ -9,10 +9,10 @@ This may be helpful for people who uses spreadsheets to control their finances (
 This app is also being developed as a learning experience in Android development. :)
 
 Roadmap:
---Listen and capture/parse Nubank notifications (FINISHED)
---Google account login for email export
---Email export for the report
---Timed Reminders for purchases report export
+- Listen and capture/parse Nubank notifications (FINISHED)
+- Google account login for email export
+- Email export for the report
+- Timed Reminders for purchases report export
 
 
 
