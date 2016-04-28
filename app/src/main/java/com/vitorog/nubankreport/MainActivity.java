@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         // For testing purposes only
         Button createNotificationButton = (Button) this.findViewById(R.id.createNotificationButton);
-        //createNotificationButton.setVisibility(View.INVISIBLE);
+        createNotificationButton.setVisibility(View.INVISIBLE);
         createNotificationButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
         if(!NubankListenerService.isStarted){
             Toast.makeText(MainActivity.this, "Notification permission required.", Toast.LENGTH_LONG).show();
             goToNotificationSettings();
+        }else{
+            Toast.makeText(MainActivity.this, "Notifications service running.", Toast.LENGTH_LONG).show();
         }
     }
 
