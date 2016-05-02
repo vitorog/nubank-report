@@ -23,7 +23,7 @@ public class NubankPurchase {
     private String notificationText;
     private String notificationTitle;
 
-    private static final String DATE_FORMAT = "dd/MM/yyyy";
+    public static final String DATE_FORMAT = "dd/MM/yyyy";
     private static final String TAG = "NubankPurchase";
 
     public NubankPurchase(Intent intent){

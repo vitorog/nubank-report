@@ -24,7 +24,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -99,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new NubankPurchasesDbHelper(getApplicationContext());
         readDatabaseEntries();
+        sortPurchasesList();
 
         if(!NubankListenerService.isStarted){
             Toast.makeText(MainActivity.this, "Notification permission required.", Toast.LENGTH_LONG).show();
@@ -152,8 +157,7 @@ public class MainActivity extends AppCompatActivity {
         if(!isDuplicated(purchase)){
             if(saveDatabaseEntry(purchase) != -1) {
                 entries.add(purchase);
-                purchasesList.add(purchase.getDisplayString());
-                purchasesAdapter.notifyDataSetChanged();
+                sortPurchasesList();
             }else{
                 Log.w(TAG, "Error saving entry to database");
             }
@@ -250,6 +254,16 @@ public class MainActivity extends AppCompatActivity {
         return b.toString();
     }
 
+    private void sortPurchasesList() {
+        //TOOD: Integrate all this with a custom adapter
+        Collections.sort(entries, new PurchasesComparator());
+        purchasesList.clear();
+        for(NubankPurchase p : entries){
+            purchasesList.add(p.getDisplayString());
+        }
+        purchasesAdapter.notifyDataSetChanged();
+    }
+
     /*After manually selecting every app related account, I got its Account type using the code below*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -273,6 +287,21 @@ public class MainActivity extends AppCompatActivity {
             if(purchase.isValid()) {
                 addNewPurchase(purchase);
             }
+        }
+    }
+
+    class PurchasesComparator implements Comparator<NubankPurchase> {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(NubankPurchase.DATE_FORMAT);
+
+        @Override
+        public int compare(NubankPurchase p1, NubankPurchase p2) {
+            try {
+                return dateFormat.parse(p1.getDate()).compareTo(dateFormat.parse(p2.getDate()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return -1;
         }
     }
 }
