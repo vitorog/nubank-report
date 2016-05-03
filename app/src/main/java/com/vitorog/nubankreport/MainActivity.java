@@ -1,6 +1,5 @@
 package com.vitorog.nubankreport;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -18,17 +17,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -36,13 +29,8 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private NotificationReceiver receiver;
-
-    // TODO: Create custom adapter type to unify these
-    private List<NubankPurchase> entries = new ArrayList<>();
-    private ArrayList<String> purchasesList = new ArrayList();
-    private ArrayAdapter<String> purchasesAdapter;
     private NubankPurchasesDbHelper databaseHelper;
-
+    private PurchasesAdapter purchasesAdapter;
     private static final String TAG = "MainActivity";
 
     @Override
@@ -55,9 +43,19 @@ public class MainActivity extends AppCompatActivity {
         receiver = new NotificationReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
-        purchasesAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, purchasesList);
+        purchasesAdapter = new PurchasesAdapter(this, R.layout.purchase_item_row);
         ListView list = (ListView)this.findViewById(R.id.notificationsListView);
         list.setAdapter(purchasesAdapter);
+        //TODO: Implement better removal
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                NubankPurchase p = purchasesAdapter.removePurchase(position);
+                removePurchase(p);
+                Toast.makeText(MainActivity.this, "Removed item", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
 
         // For testing purposes only
         Button createNotificationButton = (Button) this.findViewById(R.id.createNotificationButton);
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if(!entries.isEmpty()) {
+                if(!purchasesAdapter.getPurchasesList().isEmpty()) {
                     AccountManager accountManager = AccountManager.get(MainActivity.this);
                     // Non-depreacted method is API Level 23 :(
                     Intent intent = accountManager.newChooseAccountIntent(null, null, new String[]{"com.google"}, true, null,
@@ -103,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new NubankPurchasesDbHelper(getApplicationContext());
         readDatabaseEntries();
-        sortPurchasesList();
 
         if(!NubankListenerService.isStarted){
             Toast.makeText(MainActivity.this, "Notification permission required.", Toast.LENGTH_LONG).show();
@@ -154,10 +151,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addNewPurchase(NubankPurchase purchase){
-        if(!isDuplicated(purchase)){
+        if(!purchasesAdapter.isDuplicated(purchase)){
             if(saveDatabaseEntry(purchase) != -1) {
-                entries.add(purchase);
-                sortPurchasesList();
+                purchasesAdapter.addPurchase(purchase);
             }else{
                 Log.w(TAG, "Error saving entry to database");
             }
@@ -166,9 +162,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isDuplicated(NubankPurchase purchase) {
-        // TODO: Implement a better duplicate check
-        return purchasesList.contains(purchase.getDisplayString());
+    private void removePurchase(NubankPurchase purchase) {
+        Log.i(TAG, "Reading database entries");
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        db.delete(NubankPurchasesContract.PurchaseEntry.TABLE_NAME,
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE + "=? and " +
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE + "=? and " +
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + "=?",
+                new String[]{purchase.getPlace(), purchase.getFormattedValueStr(), purchase.getDate()});
+        Log.i(TAG, "Deleted entry");
+        db.close();
     }
 
     private void readDatabaseEntries() {
@@ -182,16 +185,15 @@ public class MainActivity extends AppCompatActivity {
 
         String sortOrder = NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + " DESC";
         Cursor c = db.query(NubankPurchasesContract.PurchaseEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
-        entries.clear();
+        purchasesAdapter.clear();
         while(c.moveToNext()){
             String formattedValue = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE));
             String place = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE));
             String date = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE));
             NubankPurchase purchase = new NubankPurchase(formattedValue, place, date);
-            entries.add(purchase);
-            purchasesList.add(purchase.getDisplayString());
-            purchasesAdapter.notifyDataSetChanged();
+            purchasesAdapter.addPurchase(purchase);
         }
+        Log.i(TAG, "Read " + purchasesAdapter.getPurchasesList().size() + " entries");
         db.close();
     }
 
@@ -212,9 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearAll() {
         Log.i(TAG, "Clear all");
-        entries.clear();
-        purchasesList.clear();
-        purchasesAdapter.notifyDataSetChanged();
+        purchasesAdapter.clear();
         clearDatabase();
     }
 
@@ -242,8 +242,9 @@ public class MainActivity extends AppCompatActivity {
     private String createReportFromData() {
         StringBuilder b = new StringBuilder();
         Double totalValue = 0.0;
-        for(int i = 0; i < entries.size(); i++){
-            NubankPurchase p = entries.get(i);
+        List<NubankPurchase> purchasesList = purchasesAdapter.getPurchasesList();
+        for(int i = 0; i < purchasesList.size(); i++){
+            NubankPurchase p = purchasesList.get(i);
             b.append(p.getFormattedString() + "\n");
             totalValue += p.getValue();
         }
@@ -252,16 +253,6 @@ public class MainActivity extends AppCompatActivity {
         b.append(Double.toString(totalValue));
         b.append("\n");
         return b.toString();
-    }
-
-    private void sortPurchasesList() {
-        //TOOD: Integrate all this with a custom adapter
-        Collections.sort(entries, new PurchasesComparator());
-        purchasesList.clear();
-        for(NubankPurchase p : entries){
-            purchasesList.add(p.getDisplayString());
-        }
-        purchasesAdapter.notifyDataSetChanged();
     }
 
     /*After manually selecting every app related account, I got its Account type using the code below*/
@@ -287,21 +278,6 @@ public class MainActivity extends AppCompatActivity {
             if(purchase.isValid()) {
                 addNewPurchase(purchase);
             }
-        }
-    }
-
-    class PurchasesComparator implements Comparator<NubankPurchase> {
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat(NubankPurchase.DATE_FORMAT);
-
-        @Override
-        public int compare(NubankPurchase p1, NubankPurchase p2) {
-            try {
-                return dateFormat.parse(p1.getDate()).compareTo(dateFormat.parse(p2.getDate()));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            return -1;
         }
     }
 }
