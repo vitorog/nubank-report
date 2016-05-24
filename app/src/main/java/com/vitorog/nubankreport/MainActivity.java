@@ -3,7 +3,6 @@ package com.vitorog.nubankreport;
 import android.accounts.AccountManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -38,10 +37,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Constants.NUBANK_PURCHASE_LISTENER_INTENT);
-        receiver = new NotificationReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
         purchasesAdapter = new PurchasesAdapter(this, R.layout.purchase_item_row);
         ListView list = (ListView)this.findViewById(R.id.notificationsListView);
@@ -111,10 +106,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume");
+        receiver = new NotificationReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.NUBANK_REPORT_MAIN_ACTIVITY_INTENT);
+        receiver = new NotificationReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+        readDatabaseEntries();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    }
+
+
+    @Override
     public void onDestroy() {
         Log.i(TAG, "Destroyed");
         super.onDestroy();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 
     @Override
@@ -150,18 +164,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void addNewPurchase(NubankPurchase purchase){
-        if(!purchasesAdapter.isDuplicated(purchase)){
-            if(saveDatabaseEntry(purchase) != -1) {
-                purchasesAdapter.addPurchase(purchase);
-            }else{
-                Log.w(TAG, "Error saving entry to database");
-            }
-        }else{
-            Log.w(TAG, "Duplicated notification.");
-        }
-    }
-
     private void removePurchase(NubankPurchase purchase) {
         Log.i(TAG, "Reading database entries");
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
@@ -195,20 +197,6 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.i(TAG, "Read " + purchasesAdapter.getPurchasesList().size() + " entries");
         db.close();
-    }
-
-    private long saveDatabaseEntry(NubankPurchase purchase){
-        Log.i(TAG, "Inserting new entry on database");
-        SQLiteDatabase db = databaseHelper.getReadableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE, purchase.getPlace());
-        values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE, purchase.getFormattedValueStr());
-        values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE, purchase.getDate());
-
-        long newRowId = db.insert(NubankPurchasesContract.PurchaseEntry.TABLE_NAME, null, values);
-        db.close();
-        return newRowId;
     }
 
 
@@ -270,14 +258,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class NotificationReceiver extends BroadcastReceiver {
+    public class NotificationReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            NubankPurchase purchase = new NubankPurchase(intent);
-            if(purchase.isValid()) {
-                addNewPurchase(purchase);
-            }
+            readDatabaseEntries();
         }
     }
 }

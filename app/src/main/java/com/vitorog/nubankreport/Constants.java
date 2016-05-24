@@ -5,7 +5,7 @@ package com.vitorog.nubankreport;
  */
 public class Constants {
     public static final String NUBANK_NOTIFICATION_LISTENER_INTENT = "com.vitorog.nubankreport.NUBANK_NOTIFICATION_LISTENER";
-    public static final String NUBANK_PURCHASE_LISTENER_INTENT = "com.vitorog.nubankreport.NUBANK_PURCHASE_LISTENER";
+    public static final String NUBANK_REPORT_MAIN_ACTIVITY_INTENT = "com.vitorog.nubankreport.NUBANK_REPORT_MAIN_ACTIVITY_INTENT";
     public static final String ANDROID_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
     public static final String PACKAGE_KEY = "package";

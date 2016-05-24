@@ -27,7 +27,7 @@ public class NubankPurchase {
     private static final String TAG = "NubankPurchase";
 
     public NubankPurchase(Intent intent){
-        if(intent.getAction() == Constants.NUBANK_PURCHASE_LISTENER_INTENT) {
+        if(intent.getAction() == Constants.NUBANK_NOTIFICATION_LISTENER_INTENT) {
             Bundle extras = intent.getExtras();
             notificationTitle = extras.getString(Constants.TITLE_KEY);
             notificationText = extras.getString(Constants.TEXT_KEY);
