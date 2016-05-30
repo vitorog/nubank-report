@@ -75,7 +75,7 @@ public class NubankListenerService extends NotificationListenerService {
             String place = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE));
             String date = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE));
             NubankPurchase purchase = new NubankPurchase(formattedValue, place, date);
-            if(purchase.getDisplayString().equals(otherPurchase.getDisplayString())){
+            if(purchase.getTimeStamp().equals(otherPurchase.getTimeStamp())){
                 return true;
             }
         }

@@ -22,6 +22,7 @@ public class NubankPurchase {
     private String notificationPackage;
     private String notificationText;
     private String notificationTitle;
+    private String timeStamp;
 
     public static final String DATE_FORMAT = "dd/MM/yyyy";
     private static final String TAG = "NubankPurchase";
@@ -32,6 +33,7 @@ public class NubankPurchase {
             notificationTitle = extras.getString(Constants.TITLE_KEY);
             notificationText = extras.getString(Constants.TEXT_KEY);
             notificationPackage = extras.getString(Constants.PACKAGE_KEY);
+            timeStamp = extras.getString(Constants.POST_TIME_KEY);
             date = getFormattedDate(extras.getLong(Constants.POST_TIME_KEY));
             parseNotificationText();
         }else{
@@ -123,4 +125,8 @@ public class NubankPurchase {
     public String getFormattedValueStr() {  return formattedValueStr;   }
 
     public Boolean isValid() { return value != -1.0; }
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
 }
