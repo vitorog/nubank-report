@@ -13,9 +13,8 @@ public class NubankPurchasesContract {
 
     public static abstract class PurchaseEntry implements BaseColumns{
         public static final String TABLE_NAME = "purchases";
-        public static final String COLUMN_NAME_PURCHASE_ID = "purchaseid";
         public static final String COLUMN_NAME_VALUE = "value";
         public static final String COLUMN_NAME_PLACE = "place";
-        public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_TIMESTAMP = "timestamp";
     }
 }

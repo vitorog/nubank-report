@@ -65,18 +65,27 @@ public class NubankListenerService extends NotificationListenerService {
         String[] projection =  {
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE,
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE,
-                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP
         };
 
-        String sortOrder = NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + " DESC";
+        String sortOrder = NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP + " DESC";
         Cursor c = db.query(NubankPurchasesContract.PurchaseEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
         while(c.moveToNext()){
             String formattedValue = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE));
             String place = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE));
-            String date = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE));
-            NubankPurchase purchase = new NubankPurchase(formattedValue, place, date);
-            if(purchase.getTimeStamp().equals(otherPurchase.getTimeStamp())){
-                return true;
+            String timeStamp = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP));
+            if(timeStamp == null){
+                continue;
+            }
+            Long ts = Long.valueOf(timeStamp);
+            Long otherTs = Long.valueOf(otherPurchase.getTimeStamp());
+            if(Math.abs(ts - otherTs) <= Constants.MAX_TIMESTAMP_DIFF){
+                Log.i(TAG, "Notifications have close timestamps.");
+                NubankPurchase p = new NubankPurchase(formattedValue, place, timeStamp);
+                if(p.getDisplayString().equals(otherPurchase.getDisplayString())){
+                    Log.i(TAG, "Display strings are equal. Duplicated notification detected.");
+                    return true;
+                }
             }
         }
         db.close();
@@ -91,7 +100,7 @@ public class NubankListenerService extends NotificationListenerService {
         ContentValues values = new ContentValues();
         values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE, purchase.getPlace());
         values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE, purchase.getFormattedValueStr());
-        values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE, purchase.getDate());
+        values.put(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP, purchase.getTimeStamp());
 
         long newRowId = db.insert(NubankPurchasesContract.PurchaseEntry.TABLE_NAME, null, values);
         db.close();

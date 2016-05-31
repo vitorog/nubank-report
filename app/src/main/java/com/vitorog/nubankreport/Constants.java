@@ -31,4 +31,7 @@ public class Constants {
 
     public static final int ACCOUNT_PICKER_INTENT = 1;
     public static final int EMAIL_EXPORT_INTENT = 2;
+
+    // Max timestamp difference used when checking for duplicate notifications
+    public static final long MAX_TIMESTAMP_DIFF = 10000;
 }

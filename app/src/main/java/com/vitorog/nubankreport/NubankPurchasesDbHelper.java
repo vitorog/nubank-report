@@ -16,7 +16,7 @@ public class NubankPurchasesDbHelper extends SQLiteOpenHelper{
                     NubankPurchasesContract.PurchaseEntry._ID + " INTEGER PRIMARY KEY," +
                     NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE + TEXT_TYPE + COMMA_SEP +
                     NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE + TEXT_TYPE + COMMA_SEP +
-                    NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + TEXT_TYPE +
+                    NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP + TEXT_TYPE +
             " )";
 
     public static final int DATABASE_VERSION = 1;

@@ -33,7 +33,7 @@ public class NubankPurchase {
             notificationTitle = extras.getString(Constants.TITLE_KEY);
             notificationText = extras.getString(Constants.TEXT_KEY);
             notificationPackage = extras.getString(Constants.PACKAGE_KEY);
-            timeStamp = extras.getString(Constants.POST_TIME_KEY);
+            timeStamp = String.valueOf(extras.getLong(Constants.POST_TIME_KEY));
             date = getFormattedDate(extras.getLong(Constants.POST_TIME_KEY));
             parseNotificationText();
         }else{
@@ -42,10 +42,17 @@ public class NubankPurchase {
         }
     }
 
-    public NubankPurchase(String formattedValueStr, String place, String date){
+    public NubankPurchase(String formattedValueStr, String place, String timeStamp){
         this.formattedValueStr = formattedValueStr;
         this.place = place;
-        this.date = date;
+        if(timeStamp == null) {
+            Log.w(TAG, "Invalid timeStamp.");
+            this.timeStamp = "N/A";
+            this.date = "N/A";
+        }else{
+            this.timeStamp = timeStamp;
+            this.date = getFormattedDate(Long.valueOf(this.timeStamp));
+        }
         String valueStr = formattedValueStr.replaceFirst(Constants.NUBANK_CURRENCY_COMMA_CHAR, Constants.NUBANK_CURRENCY_DOT_CHAR);
         value = Double.valueOf(valueStr);
     }

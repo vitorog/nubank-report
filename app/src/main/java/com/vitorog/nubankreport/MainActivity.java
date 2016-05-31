@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
         db.delete(NubankPurchasesContract.PurchaseEntry.TABLE_NAME,
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE + "=? and " +
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE + "=? and " +
-                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + "=?",
-                new String[]{purchase.getPlace(), purchase.getFormattedValueStr(), purchase.getDate()});
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP + "=?",
+                new String[]{purchase.getPlace(), purchase.getFormattedValueStr(), purchase.getTimeStamp()});
         Log.i(TAG, "Deleted entry");
         db.close();
     }
@@ -182,17 +182,17 @@ public class MainActivity extends AppCompatActivity {
         String[] projection =  {
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE,
                 NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE,
-                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE
+                NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP
         };
 
-        String sortOrder = NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE + " DESC";
+        String sortOrder = NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP + " DESC";
         Cursor c = db.query(NubankPurchasesContract.PurchaseEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
         purchasesAdapter.clear();
         while(c.moveToNext()){
             String formattedValue = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_VALUE));
             String place = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_PLACE));
-            String date = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_DATE));
-            NubankPurchase purchase = new NubankPurchase(formattedValue, place, date);
+            String timeStamp = c.getString(c.getColumnIndex(NubankPurchasesContract.PurchaseEntry.COLUMN_NAME_TIMESTAMP));
+            NubankPurchase purchase = new NubankPurchase(formattedValue, place, timeStamp);
             purchasesAdapter.addPurchase(purchase);
         }
         Log.i(TAG, "Read " + purchasesAdapter.getPurchasesList().size() + " entries");
